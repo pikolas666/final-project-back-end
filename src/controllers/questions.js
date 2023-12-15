@@ -2,9 +2,17 @@ import QuestionModel from "../models/question.js";
 
 const ADD_QUESTION = async (req, res) => {
 	try {
-		const question = new QuestionModel({
+		const question = await new QuestionModel({
 			question_text: req.body.question_text,
-			date: new Date().toISOString(),
+			date: new Date().toLocaleString("lt-LT", {
+				year: "numeric",
+				month: "2-digit",
+				day: "2-digit",
+				hour: "2-digit",
+				minute: "2-digit",
+				second: "2-digit",
+				hour12: false,
+			}),
 			user_id: req.body.user_id,
 		});
 
@@ -20,13 +28,38 @@ const ADD_QUESTION = async (req, res) => {
 };
 
 const GET_QUESTIONS = async (req, res) => {
-	const questions = await QuestionModel.find();
-	return res.status(200).json({ questions: questions });
+	try {
+		const users = await QuestionModel.aggregate([
+			{
+				$lookup: {
+					from: "answers",
+					localField: "id",
+					foreignField: "question_id",
+					as: "answers",
+				},
+			},
+		]);
+
+		return res.status(200).json(users);
+	} catch (err) {
+		console.log(err);
+		return res.status(500).json({ message: "something went wrong" });
+	}
 };
 
 const DELETE_QUESTION = async (req, res) => {
-	const response = await QuestionModel.deleteOne({ _id: req.params.id });
-	return res.status(200).json({ response: response });
+	try {
+		const response = await QuestionModel.deleteOne({ _id: req.params.id });
+
+		if (response.deletedCount === 0) {
+			return res.status(404).json({ message: "Question not found" });
+		}
+
+		return res.status(200).json({ message: "Question deleted successfully" });
+	} catch (error) {
+		console.error("Error deleting question:", error);
+		return res.status(500).json({ error: "Internal Server Error" });
+	}
 };
 
 export { ADD_QUESTION, GET_QUESTIONS, DELETE_QUESTION };
