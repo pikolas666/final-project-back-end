@@ -16,6 +16,8 @@ const ADD_ANSWER = async (req, res) => {
 			user_id: req.body.user_id,
 			user: req.body.user,
 			gained_likes_number: 0,
+			upvotes: [],
+			downvotes: [],
 			question_id: req.params.id,
 		});
 
@@ -63,34 +65,38 @@ const DELETE_ANSWER = async (req, res) => {
 	}
 };
 
-const INCREASE_LIKES_NUMBER = async (req, res) => {
+const UPVOTE_ANSWER = async (req, res) => {
 	const answerId = req.params.id;
+	const userId = req.body.user_id;
+
 	try {
-		const updatedLikesNumber = await AnswerModel.findByIdAndUpdate(
+		const updatedAnswer = await AnswerModel.findByIdAndUpdate(
 			answerId,
-			{ $inc: { gained_likes_number: +1 } },
+			{ $push: { upvotes: userId } },
 			{ new: true }
 		);
 
-		res.status(201).json({ success: true, answer: updatedLikesNumber });
+		res.status(200).json({ success: true, answer: updatedAnswer });
 	} catch (error) {
 		console.error("Error upvoting answer:", error);
 		res.status(500).json({ success: false, error: "Internal Server Error" });
 	}
 };
 
-const DECREASE_LIKES_NUMBER = async (req, res) => {
+const DOWNVOTE_ANSWER = async (req, res) => {
 	const answerId = req.params.id;
+	const userId = req.body.user_id;
+
 	try {
-		const updatedLikesNumber = await AnswerModel.findByIdAndUpdate(
+		const updatedAnswer = await AnswerModel.findByIdAndUpdate(
 			answerId,
-			{ $inc: { gained_likes_number: -1 } },
+			{ $push: { downvotes: userId } },
 			{ new: true }
 		);
 
-		res.status(201).json({ success: true, answer: updatedLikesNumber });
+		res.status(200).json({ success: true, answer: updatedAnswer });
 	} catch (error) {
-		console.error("Error upvoting answer:", error);
+		console.error("Error downvoting answer:", error);
 		res.status(500).json({ success: false, error: "Internal Server Error" });
 	}
 };
@@ -99,6 +105,6 @@ export {
 	ADD_ANSWER,
 	DELETE_ANSWER,
 	GET_ANSWERS_BY_ID,
-	INCREASE_LIKES_NUMBER,
-	DECREASE_LIKES_NUMBER,
+	UPVOTE_ANSWER,
+	DOWNVOTE_ANSWER,
 };
