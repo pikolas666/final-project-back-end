@@ -5,6 +5,7 @@ const QuestionSchema = mongoose.Schema({
 	date: { type: String, required: true },
 	id: { type: String, required: true },
 	user_id: { type: String, required: true },
+	user: { type: String, required: true },
 });
 
 export default mongoose.model("Questions", QuestionSchema);

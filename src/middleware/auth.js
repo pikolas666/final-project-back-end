@@ -11,9 +11,10 @@ const authenticateUser = (req, res, next) => {
 		if (err) {
 			return res.status(401).json({ message: "Bad auth" });
 		}
-		// sita eilute pravers ateity
-		req.body.name = decoded.name;
-		req.body.userId = decoded.id;
+
+		req.body.user = decoded.name;
+		req.body.user_id = decoded.user_id;
+
 		return next();
 	});
 };

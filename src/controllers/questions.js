@@ -14,6 +14,7 @@ const ADD_QUESTION = async (req, res) => {
 				hour12: false,
 			}),
 			user_id: req.body.user_id,
+			user: req.body.user,
 		});
 
 		question.id = question._id;
@@ -47,6 +48,11 @@ const GET_QUESTIONS = async (req, res) => {
 	}
 };
 
+const GET_QUESTION_BY_ID = async (req, res) => {
+	const question = await QuestionModel.findOne({ _id: req.params.id });
+	return res.status(200).json({ question });
+};
+
 const DELETE_QUESTION = async (req, res) => {
 	try {
 		const response = await QuestionModel.deleteOne({ _id: req.params.id });
@@ -62,4 +68,4 @@ const DELETE_QUESTION = async (req, res) => {
 	}
 };
 
-export { ADD_QUESTION, GET_QUESTIONS, DELETE_QUESTION };
+export { ADD_QUESTION, GET_QUESTIONS, DELETE_QUESTION, GET_QUESTION_BY_ID };
