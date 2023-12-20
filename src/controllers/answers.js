@@ -70,11 +70,18 @@ const UPVOTE_ANSWER = async (req, res) => {
 	const userId = req.body.user_id;
 
 	try {
-		const updatedAnswer = await AnswerModel.findByIdAndUpdate(
-			answerId,
-			{ $push: { upvotes: userId } },
-			{ new: true }
-		);
+		const answer = await AnswerModel.findById(answerId);
+
+		if (answer.upvotes.includes(userId)) {
+			return res
+				.status(400)
+				.json({ success: false, error: "User has already upvoted." });
+		}
+		if (answer.downvotes.includes(userId)) {
+			answer.downvotes = answer.downvotes.filter((id) => id !== userId);
+		} else answer.upvotes = [userId];
+
+		const updatedAnswer = await answer.save();
 
 		res.status(200).json({ success: true, answer: updatedAnswer });
 	} catch (error) {
@@ -88,11 +95,18 @@ const DOWNVOTE_ANSWER = async (req, res) => {
 	const userId = req.body.user_id;
 
 	try {
-		const updatedAnswer = await AnswerModel.findByIdAndUpdate(
-			answerId,
-			{ $push: { downvotes: userId } },
-			{ new: true }
-		);
+		const answer = await AnswerModel.findById(answerId);
+
+		if (answer.downvotes.includes(userId)) {
+			return res
+				.status(400)
+				.json({ success: false, error: "User has already downvoted." });
+		}
+		if (answer.upvotes.includes(userId)) {
+			answer.upvotes = answer.upvotes.filter((id) => id !== userId);
+		} else answer.downvotes = [userId];
+
+		const updatedAnswer = await answer.save();
 
 		res.status(200).json({ success: true, answer: updatedAnswer });
 	} catch (error) {
