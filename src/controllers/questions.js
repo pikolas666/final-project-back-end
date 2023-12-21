@@ -55,13 +55,29 @@ const GET_QUESTION_BY_ID = async (req, res) => {
 
 const DELETE_QUESTION = async (req, res) => {
 	try {
-		const response = await QuestionModel.deleteOne({ _id: req.params.id });
+		const question = await QuestionModel.findOne({ _id: req.params.id });
 
-		if (response.deletedCount === 0) {
+		if (!question) {
 			return res.status(404).json({ message: "Question not found" });
 		}
 
-		return res.status(200).json({ message: "Question deleted successfully" });
+		if (req.body.user_id === question.user_id) {
+			const deleteResponse = await QuestionModel.deleteOne({
+				_id: req.params.id,
+			});
+
+			if (deleteResponse.deletedCount === 1) {
+				return res
+					.status(200)
+					.json({ message: "Question deleted successfully" });
+			} else {
+				return res.status(500).json({ error: "Failed to delete the question" });
+			}
+		}
+
+		return res
+			.status(403)
+			.json({ message: "Unauthorized: You can only delete your own question" });
 	} catch (error) {
 		console.error("Error deleting question:", error);
 		return res.status(500).json({ error: "Internal Server Error" });

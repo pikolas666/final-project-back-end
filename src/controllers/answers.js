@@ -57,8 +57,27 @@ const GET_ANSWERS_BY_ID = async (req, res) => {
 
 const DELETE_ANSWER = async (req, res) => {
 	try {
-		const response = await AnswerModel.deleteOne({ _id: req.params.id });
-		return res.status(200).json({ response: response });
+		const answer = await AnswerModel.findOne({ _id: req.params.id });
+
+		if (!answer) {
+			return res.status(404).json({ message: "Answer not found" });
+		}
+
+		if (req.body.user_id === answer.user_id) {
+			const deleteResponse = await AnswerModel.deleteOne({
+				_id: req.params.id,
+			});
+
+			if (deleteResponse.deletedCount === 1) {
+				return res.status(200).json({ message: "Answer deleted successfully" });
+			} else {
+				return res.status(500).json({ error: "Failed to delete the answer" });
+			}
+		}
+
+		return res
+			.status(403)
+			.json({ message: "Unauthorized: You can only delete your own answer" });
 	} catch (error) {
 		console.error("Error deleting answer:", error);
 		return res.status(500).json({ error: "Internal Server Error" });
@@ -83,7 +102,7 @@ const UPVOTE_ANSWER = async (req, res) => {
 
 		const updatedAnswer = await answer.save();
 
-		res.status(200).json({ success: true, answer: updatedAnswer });
+		return res.status(200).json({ success: true, answer: updatedAnswer });
 	} catch (error) {
 		console.error("Error upvoting answer:", error);
 		res.status(500).json({ success: false, error: "Internal Server Error" });
