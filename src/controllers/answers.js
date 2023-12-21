@@ -32,16 +32,6 @@ const ADD_ANSWER = async (req, res) => {
 	}
 };
 
-// const GET_ANSWERS = async (req, res) => {
-// 	try {
-// 		const answers = await AnswerModel.find();
-// 		return res.status(200).json({ answers: answers });
-// 	} catch (err) {
-// 		console.error(err);
-// 		return res.status(500).json({ message: "Something went wrong" });
-// 	}
-// };
-
 const GET_ANSWERS_BY_ID = async (req, res) => {
 	try {
 		const questionId = req.params.id;
